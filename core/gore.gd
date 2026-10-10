@@ -11,6 +11,16 @@ const BLOOD_COLORS: Array[Color] = [
 var _layer: BloodLayer
 
 
+## The first particle burst and first floating label pay a one-time setup cost (shader
+## pipelines, glyph caching) that otherwise lands as a stall on the first hit. Pay it while
+## the game starts instead, off-screen. The caches are process-wide, so once is enough.
+func _ready() -> void:
+	await get_tree().process_frame
+	var far := Vector2(-100000, -100000)
+	bleed(far, Vector2.RIGHT, 30.0)
+	Juice.popup_text(far, "0")
+
+
 ## Splats land on the ground around `origin` (feet); the spray starts `height` px above it.
 func bleed(origin: Vector2, direction: Vector2, damage: float, height: float = 6.0) -> void:
 	var layer := _get_layer()
