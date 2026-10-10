@@ -15,6 +15,10 @@ const SPAWN_POINT_ATTEMPTS := 40
 @export var enabled: bool = false
 @export var trash_scene: PackedScene
 @export var elite_scene: PackedScene
+## Mixed into trickle packs and hordes.
+@export var shielded_scene: PackedScene
+@export_range(0.0, 1.0) var shielded_pack_chance: float = 0.25
+@export_range(0.0, 1.0) var shielded_horde_ratio: float = 0.1
 
 @export_group("Build-up")
 @export var build_up_duration: float = 25.0
@@ -27,6 +31,13 @@ const SPAWN_POINT_ATTEMPTS := 40
 @export var horde_spawn_duration: float = 8.0
 ## The horde ends once fewer than this many enemies are alive.
 @export var horde_end_threshold: int = 8
+
+@export_group("Specials")
+## Priority targets, spawned on their own timer during build-up and hordes.
+@export var special_scenes: Array[PackedScene] = []
+@export var special_interval: Vector2 = Vector2(10.0, 18.0)
+@export var max_specials_alive: int = 3
+@export var max_per_special: int = 2
 
 @export_group("Relax")
 @export var relax_duration: float = 12.0
@@ -41,6 +52,7 @@ var phase_time: float = 0.0
 
 var _trickle_left := 0.0
 var _elite_left := 0.0
+var _special_left := 0.0
 var _horde_spawned := 0
 var _horde_points: Array[Vector2] = []
 var _flow_field: FlowField
@@ -49,6 +61,7 @@ var _flow_field: FlowField
 func _ready() -> void:
 	add_to_group("director")
 	_elite_left = elite_interval
+	_special_left = special_interval.x
 
 
 func _physics_process(delta: float) -> void:
@@ -59,12 +72,15 @@ func _physics_process(delta: float) -> void:
 		if _flow_field == null:
 			return
 	phase_time += delta
+	if phase != Phase.RELAX:
+		_tick_specials(delta)
 	match phase:
 		Phase.BUILD_UP:
 			_trickle_left -= delta
 			if _trickle_left <= 0.0:
 				_trickle_left = randf_range(trickle_interval.x, trickle_interval.y)
-				spawn_pack(trash_scene, randi_range(trickle_pack_size.x, trickle_pack_size.y))
+				var pack_scene := shielded_scene if shielded_scene and randf() < shielded_pack_chance else trash_scene
+				spawn_pack(pack_scene, randi_range(trickle_pack_size.x, trickle_pack_size.y))
 			_elite_left -= delta
 			if _elite_left <= 0.0 and elite_scene:
 				_elite_left = elite_interval
@@ -74,13 +90,30 @@ func _physics_process(delta: float) -> void:
 		Phase.HORDE:
 			var target_spawned := int(horde_size * clampf(phase_time / horde_spawn_duration, 0.0, 1.0))
 			while _horde_spawned < target_spawned:
-				_spawn_at(trash_scene, _horde_points.pick_random())
+				var horde_scene := shielded_scene if shielded_scene and randf() < shielded_horde_ratio else trash_scene
+				_spawn_at(horde_scene, _horde_points.pick_random())
 				_horde_spawned += 1
 			if _horde_spawned >= horde_size and alive_count() < horde_end_threshold:
 				_set_phase(Phase.RELAX)
 		Phase.RELAX:
 			if phase_time >= relax_duration:
 				_set_phase(Phase.BUILD_UP)
+
+
+func _tick_specials(delta: float) -> void:
+	if special_scenes.is_empty():
+		return
+	_special_left -= delta
+	if _special_left > 0.0:
+		return
+	_special_left = randf_range(special_interval.x, special_interval.y)
+	var alive := get_tree().get_nodes_in_group("priority")
+	if alive.size() >= max_specials_alive:
+		return
+	var scene: PackedScene = special_scenes.pick_random()
+	var same := alive.filter(func(n: Node) -> bool: return n.scene_file_path == scene.resource_path).size()
+	if same < max_per_special:
+		spawn_pack(scene, 1)
 
 
 func set_enabled(value: bool) -> void:

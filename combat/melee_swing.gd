@@ -69,12 +69,16 @@ func advance(progress: float) -> int:
 		var target: Combatant = entry[1]
 		_hit_ids[target.get_instance_id()] = true
 		_cleave_left -= target.mass
-		_apply_hit(target)
 		hits_now += 1
+		if not _apply_hit(target):
+			# Blocked (shield, guard): the swing stops dead.
+			_finished = true
+			break
 	return hits_now
 
 
-func _apply_hit(target: Combatant) -> void:
+## Returns false if the target blocked the hit.
+func _apply_hit(target: Combatant) -> bool:
 	var hit := HitInfo.new()
 	hit.attacker = attacker
 	hit.attack = attack
@@ -88,7 +92,7 @@ func _apply_hit(target: Combatant) -> void:
 	# Crit window: punish enemies mid wind-up, or hit them from behind.
 	hit.is_crit = target.is_winding_up() or target.aim_direction.dot(hit.direction) > 0.5
 	_hit_count += 1
-	target.receive_hit(hit)
+	return target.receive_hit(hit)
 
 
 func _query_targets() -> Array[Combatant]:

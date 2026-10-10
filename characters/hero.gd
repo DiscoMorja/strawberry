@@ -3,7 +3,7 @@ extends Combatant
 ## Player-controlled melee fighter (M1). Input is read directly for now;
 ## it moves to a pluggable controller in M3 so followers can share this code.
 
-enum State { FREE, CHARGING, ATTACKING, BLOCKING, PUSHING, DODGING, STAGGERED, DEAD }
+enum State { FREE, CHARGING, ATTACKING, BLOCKING, PUSHING, DODGING, STAGGERED, GRABBED, DEAD }
 enum Phase { WINDUP, ACTIVE, RECOVERY }
 
 const STICK_AIM_DEADZONE := 0.3
@@ -33,6 +33,12 @@ const PUSH_STATE_TIME := 0.25
 @export var block_move_multiplier: float = 0.5
 @export var guard_break_duration: float = 0.8
 @export var push_cooldown: float = 0.5
+
+@export_group("Grabbed")
+## Stamina spent to struggle free of a grab (dodge input).
+@export var struggle_cost: int = 2
+## How tightly a grabber tows this character (higher = snappier).
+@export var tow_stiffness: float = 12.0
 
 @export_group("Debug")
 @export var respawn_delay: float = 2.0
@@ -82,6 +88,11 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 	_tick_timers(delta)
+	if is_grabbed():
+		_tick_grabbed()
+		return
+	if state == State.GRABBED:
+		state = State.STAGGERED if is_staggered() else State.FREE
 	if is_staggered() and state != State.STAGGERED:
 		_enter_staggered()
 
@@ -146,6 +157,31 @@ func _physics_process(delta: float) -> void:
 			var facing := aim_direction if _phase == Phase.WINDUP else _swing_facing
 			velocity += _attack.motion_velocity(_attack_elapsed, facing)
 	velocity += knockback_velocity
+	move_and_slide()
+
+
+## Towed by the grabber; the only action is struggling free.
+func _tick_grabbed() -> void:
+	if state != State.GRABBED:
+		_swing = null
+		state = State.GRABBED
+		_state_time = 0.0
+	if Input.is_action_just_pressed("dodge") and stamina >= struggle_cost:
+		_spend_stamina(struggle_cost)
+		var grabber := grabbed_by as GrabberEnemy
+		if grabber:
+			grabber.release_grab()
+		Juice.popup_text(head_position(), "BROKE FREE", Color(0.6, 0.9, 1.0), 10)
+		Juice.shake(0.2)
+		state = State.FREE
+		return
+	var anchor := grabbed_by.global_position
+	var offset := global_position - anchor
+	var hold_distance := body_radius + grabbed_by.body_radius + 4.0
+	var desired_position := anchor + offset.normalized() * hold_distance
+	aim_direction = -offset.normalized()
+	_move_velocity = Vector2.ZERO
+	velocity = (desired_position - global_position) * tow_stiffness
 	move_and_slide()
 
 

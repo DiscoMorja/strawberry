@@ -152,4 +152,5 @@ res://
 
 1. ~~`git init` + first commit.~~ Done.
 2. ~~M0: input map, physics layers, debug overlay, grey-box arena.~~ Done.
-3. M1 (in progress): core combat built — light chain, heavy, block/push/stamina, dodge, cleave, stagger, crits, trash + elite, hit-stop, shake, gore. Next: playtest + tune.
+3. M1: core combat built — light chain, heavy, block/push/stamina, dodge, cleave, stagger, crits, swing momentum, moving enemy attacks, side-view presentation. Ongoing: feel tuning from playtests.
+4. M2 (in progress): flow field + crowd separation (150 enemies ≈ 5.5 ms physics), director (build-up/horde/relax), specials (archer, grabber), shielded, threat indicators, placeholder sfx. Next: playtest priority-target readability, tune director pacing.

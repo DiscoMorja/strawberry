@@ -5,6 +5,9 @@ extends Node2D
 const TrainingDummyScene := preload("res://debug/training_dummy.tscn")
 const TrashScene := preload("res://enemies/trash.tscn")
 const EliteScene := preload("res://enemies/elite.tscn")
+const ArcherScene := preload("res://enemies/archer.tscn")
+const GrabberScene := preload("res://enemies/grabber.tscn")
+const ShieldedScene := preload("res://enemies/shielded.tscn")
 const TRASH_PACK_SIZE := 6
 const STRESS_PACKS := 5
 const STRESS_PACK_SIZE := 10
@@ -54,6 +57,8 @@ func _ready() -> void:
 	_director = Director.new()
 	_director.trash_scene = TrashScene
 	_director.elite_scene = EliteScene
+	_director.shielded_scene = ShieldedScene
+	_director.special_scenes.assign([ArcherScene, GrabberScene])
 	add_child(_director)
 
 
@@ -66,6 +71,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			_spawn(TrashScene, mouse + Vector2.from_angle(TAU * i / TRASH_PACK_SIZE) * 14.0)
 	elif event.is_action_pressed("debug_spawn_elite"):
 		_spawn(EliteScene, mouse)
+	elif event.is_action_pressed("debug_spawn_archer"):
+		_spawn(ArcherScene, mouse)
+	elif event.is_action_pressed("debug_spawn_grabber"):
+		_spawn(GrabberScene, mouse)
+	elif event.is_action_pressed("debug_spawn_shielded"):
+		for i in 4:
+			_spawn(ShieldedScene, mouse + Vector2.from_angle(TAU * i / 4) * 12.0)
 	elif event.is_action_pressed("debug_toggle_director"):
 		_director.set_enabled(not _director.enabled)
 		Juice.popup_text(get_viewport().get_camera_2d().get_screen_center_position() + Vector2(0, -60),

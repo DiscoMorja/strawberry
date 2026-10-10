@@ -37,6 +37,8 @@ var stagger_time: float = 0.0
 var stagger_tier: int = StaggerTier.NONE
 var knockback_velocity: Vector2 = Vector2.ZERO
 var is_dead: bool = false
+## Set while a disabler holds this combatant; it can't act until released.
+var grabbed_by: Combatant
 
 var _flash_time: float = 0.0
 var _tokens_used: int = 0
@@ -76,11 +78,16 @@ func is_winding_up() -> bool:
 	return false
 
 
-func receive_hit(hit: HitInfo) -> void:
+func is_grabbed() -> bool:
+	return is_instance_valid(grabbed_by) and not grabbed_by.is_dead
+
+
+## Resolves a hit. Returns true if it landed, false if it was blocked or ignored.
+func receive_hit(hit: HitInfo) -> bool:
 	if is_dead:
-		return
+		return false
 	if _try_block(hit):
-		return
+		return false
 	var amount := hit.damage
 	if is_staggered():
 		amount *= 1.0 + STAGGERED_DAMAGE_BONUS
@@ -89,7 +96,7 @@ func receive_hit(hit: HitInfo) -> void:
 	knockback_velocity += hit.direction * hit.knockback / sqrt(mass)
 	_apply_stagger(hit.stagger * (CRIT_STAGGER_MULTIPLIER if hit.is_crit else 1.0))
 	if amount <= 0.0:
-		return
+		return true
 	health -= amount
 	_flash_time = FLASH_DURATION
 	var heavy := hit.stagger >= 30.0 or hit.is_crit
@@ -100,6 +107,7 @@ func receive_hit(hit: HitInfo) -> void:
 	Gore.bleed(global_position, hit.direction, amount, body_height * 0.6)
 	if health <= 0.0:
 		die(hit)
+	return true
 
 
 func die(hit: HitInfo) -> void:
