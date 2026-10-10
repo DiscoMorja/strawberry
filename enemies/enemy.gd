@@ -23,6 +23,8 @@ var state: State = State.IDLE
 var _attack: AttackData
 var _swing: MeleeSwing
 var _phase_time := 0.0
+## Seconds since the current attack's wind-up began (drives AttackData.motion_velocity).
+var _attack_elapsed := 0.0
 var _cooldown_left := 0.0
 ## Who we hold an attack token from. Kept separate from `target`, which can change or die.
 var _token_holder: Combatant
@@ -46,7 +48,7 @@ func is_winding_up() -> bool:
 
 func _physics_process(delta: float) -> void:
 	update_combat_state(delta)
-	queue_redraw()
+	redraw()
 	_cooldown_left -= delta
 	_retarget_left -= delta
 	var attacking := state == State.WINDUP or state == State.ACTIVE or state == State.RECOVERY
@@ -66,18 +68,20 @@ func _physics_process(delta: float) -> void:
 			desired = _chase()
 		State.WINDUP:
 			_phase_time += delta
+			_attack_elapsed += delta
 			if _target_valid():
 				var to_target := target.global_position - global_position
 				var turn := clampf(aim_direction.angle_to(to_target), -windup_turn_rate * delta, windup_turn_rate * delta)
 				aim_direction = aim_direction.rotated(turn)
-			desired = aim_direction * move_speed * _attack.move_speed_multiplier
+			desired = _attack.motion_velocity(_attack_elapsed, aim_direction)
 			if _phase_time >= _attack.windup:
 				state = State.ACTIVE
 				_phase_time = 0.0
 				_swing = MeleeSwing.new(self, _attack, aim_direction, PhysicsLayers.PARTY_BODY)
-				knockback_velocity += aim_direction * _attack.lunge_speed
 		State.ACTIVE:
 			_phase_time += delta
+			_attack_elapsed += delta
+			desired = _attack.motion_velocity(_attack_elapsed, aim_direction)
 			if _swing.advance(clampf(_phase_time / maxf(_attack.active, 0.001), 0.0, 1.0)) > 0:
 				Juice.shake(_attack.shake)
 			if _phase_time >= _attack.active:
@@ -106,9 +110,14 @@ func _chase() -> Vector2:
 		_attack = attack
 		state = State.WINDUP
 		_phase_time = 0.0
+		_attack_elapsed = 0.0
 		return Vector2.ZERO
-	# Hold just inside reach instead of shoving into the target.
-	var min_reach := attacks[0].reach if not attacks.is_empty() else 12.0
+	# Close in to just inside the shortest reach instead of shoving into the target.
+	var min_reach := INF
+	for a in attacks:
+		min_reach = minf(min_reach, a.reach)
+	if min_reach == INF:
+		min_reach = 12.0
 	if distance > min_reach * 0.6:
 		return aim_direction * move_speed
 	return Vector2.ZERO
@@ -117,7 +126,7 @@ func _chase() -> Vector2:
 func _pick_attack(distance: float) -> AttackData:
 	var in_range: Array[AttackData] = []
 	for attack in attacks:
-		if distance <= attack.reach * 0.9:
+		if distance >= attack.min_range and distance <= attack.trigger_range() * 0.9:
 			in_range.append(attack)
 	return in_range.pick_random() if not in_range.is_empty() else null
 
@@ -169,19 +178,26 @@ func die(hit: HitInfo) -> void:
 
 
 func _draw() -> void:
+	draw_body()
+	draw_weapon(body_radius + 4.0, Color(0.6, 0.55, 0.5))
+	if show_health_bar and health < max_health:
+		var width := body_radius * 3.0
+		var top_left := head_position() - global_position + Vector2(-width / 2, 2)
+		draw_rect(Rect2(top_left, Vector2(width, 2)), Color(0, 0, 0, 0.7))
+		draw_rect(Rect2(top_left, Vector2(width * health / max_health, 2)), Color(0.85, 0.15, 0.15))
+
+
+func _draw_ground(canvas: CanvasItem) -> void:
 	match state:
 		State.WINDUP:
 			var t := clampf(_phase_time / _attack.windup, 0.0, 1.0)
 			var color := Color(1.0, 0.5, 0.1) if _attack.block_cost >= 3 or _attack.unblockable else Color(0.9, 0.1, 0.1)
-			CombatDraw.sector(self, aim_direction, _attack.reach + body_radius, _attack.arc_degrees, Color(color, 0.12))
-			CombatDraw.sector(self, aim_direction, (_attack.reach + body_radius) * t, _attack.arc_degrees, Color(color, 0.3))
+			var radius := _attack.reach + body_radius
+			CombatDraw.sector(canvas, aim_direction, radius, _attack.arc_degrees, Color(color, 0.12))
+			CombatDraw.sector(canvas, aim_direction, radius * t, _attack.arc_degrees, Color(color, 0.3))
+			if _attack.lunge_distance + _attack.windup_advance_speed > 20.0:
+				# Moving attack: show where the lunge carries it.
+				canvas.draw_line(Vector2.ZERO, aim_direction * (_attack.lunge_distance + radius), Color(color, 0.35), 1.0)
 		State.ACTIVE:
 			var progress := clampf(_phase_time / maxf(_attack.active, 0.001), 0.0, 1.0)
-			CombatDraw.swing(self, aim_direction, _attack, progress, Color(1.0, 0.3, 0.2, 0.6))
-	draw_body()
-	draw_line(Vector2.ZERO, aim_direction * body_radius, Color(0, 0, 0, 0.6), 2.0)
-	if show_health_bar and health < max_health:
-		var width := body_radius * 3.0
-		var top_left := Vector2(-width / 2, -body_radius - 7)
-		draw_rect(Rect2(top_left, Vector2(width, 2)), Color(0, 0, 0, 0.7))
-		draw_rect(Rect2(top_left, Vector2(width * health / max_health, 2)), Color(0.85, 0.15, 0.15))
+			CombatDraw.swing(canvas, aim_direction, _attack, progress, Color(1.0, 0.3, 0.2, 0.6))

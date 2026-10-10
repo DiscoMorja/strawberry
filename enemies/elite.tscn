@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://enemies/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://combat/attack_data.gd" id="2_attack"]
@@ -19,7 +19,9 @@ knockback = 140.0
 hit_stop = 0.0
 shake = 0.35
 block_cost = 2
-lunge_speed = 40.0
+windup_advance_speed = 20.0
+lunge_distance = 14.0
+lunge_lateral = 10.0
 move_speed_multiplier = 0.15
 
 [sub_resource type="Resource" id="Resource_slam"]
@@ -38,8 +40,29 @@ knockback = 220.0
 hit_stop = 0.0
 shake = 0.6
 block_cost = 3
-lunge_speed = 120.0
+lunge_distance = 22.0
 move_speed_multiplier = 0.1
+
+[sub_resource type="Resource" id="Resource_charge"]
+script = ExtResource("2_attack")
+name = "Charging Cleave"
+windup = 1.0
+active = 0.16
+recovery = 0.9
+reach = 28.0
+arc_degrees = 130.0
+sweep_direction = -1
+damage = 28.0
+stagger = 30.0
+cleave = 3.0
+knockback = 160.0
+hit_stop = 0.0
+shake = 0.4
+block_cost = 2
+windup_advance_speed = 75.0
+lunge_distance = 16.0
+move_speed_multiplier = 0.0
+min_range = 40.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 10.0
@@ -50,7 +73,7 @@ collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_enemy")
 move_speed = 40.0
-attacks = Array[ExtResource("2_attack")]([SubResource("Resource_sweep"), SubResource("Resource_slam")])
+attacks = Array[ExtResource("2_attack")]([SubResource("Resource_sweep"), SubResource("Resource_slam"), SubResource("Resource_charge")])
 attack_cooldown = 1.6
 token_cost = 2
 windup_turn_rate = 1.2
@@ -60,6 +83,7 @@ max_health = 260.0
 mass = 5.0
 stagger_resist = 30.0
 body_radius = 10.0
+body_height = 22.0
 body_color = Color(0.35, 0.33, 0.45, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

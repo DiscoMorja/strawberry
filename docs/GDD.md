@@ -102,7 +102,25 @@ visual telegraphs, hit-stop, screen shake and directional indicators.
 - **Hit-stop & feedback:** Every hit freezes 30–80 ms scaled by weight. Mandatory, not polish.
 - **Friendly fire:** Off for melee in v1; consider on for some skills (bombs, fire).
 
-### 5.3 Weapons (archetypes, not a final list)
+### 5.3 Movement in combat
+
+- **Swing momentum:** every attack has a movement profile — optional advance during wind-up, a
+  forward lunge that eases out over the swing, and a lateral drift in the direction the arc sweeps
+  (left slash drifts left, right slash drifts right). Chaining lights while steering should feel fluid.
+- **Momentum persists:** movement input steers but doesn't snap; velocity carries through attacks and out of dodges.
+- **Enemies move while attacking:** advancing wind-ups (charging cleaves), leaps from range, lunging slams.
+  The attack origin moves, so blocks and dodges must be timed against a moving threat, sometimes mid-own-swing.
+- **Hit-stop once per swing** (on first contact), not per target, to keep cleaves flowing.
+
+### 5.4 Presentation (perspective)
+
+- Gameplay happens on a flat ground plane (collision, reach, arcs are all ground-space).
+- Characters are drawn upright standing on their feet origin and face left/right; true aim is shown by a
+  ground marker and the weapon.
+- Depth ordering by feet Y; walls have a footprint plus visible height and occlude actors behind them.
+- Ground layer (below actors): telegraphs, swing arcs, block arcs, blood. Above actors: sprays, damage numbers.
+
+### 5.5 Weapons (archetypes, not a final list)
 
 | Archetype | Cleave | Stagger | Speed | Role |
 |---|---|---|---|---|
@@ -320,6 +338,8 @@ Two-layer roguelike: **dungeon run** (20–40 min, hero death ends it) inside a 
 | Carry-over between campaigns | **Nothing for now.** Meta progression is a later option (§12.4 proposal parked). |
 | Bastion shape | **Pips** (start with 3). |
 | Art style | **Stylized, gritty pixel art with heavy gore/blood in combat.** Base resolution still to be picked by the resolution test. |
+| Perspective | **Top-down gameplay plane, side-view (3/4) presentation** like Vampire Survivors: upright sprites facing left/right, origin at the feet, Y-sorted depth, walls with visible height. Telegraphs, swing arcs and blood lie flat on the ground beneath actors (§5.4). |
+| Swing feel | **Attacks carry momentum** (forward lunge + sideways drift along the swing) and movement momentum persists through swings — combat should feel like a dance, not a stand-still trade. Enemies have moving attacks too (§5.4). |
 | Lingering wounds | **Yes** (§6.2). |
 | Extraction | **Checkpoints throughout the biome** (not boss-only) where you choose to leave or continue (§9). |
 

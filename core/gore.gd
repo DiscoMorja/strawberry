@@ -11,7 +11,8 @@ const BLOOD_COLORS: Array[Color] = [
 var _layer: BloodLayer
 
 
-func bleed(origin: Vector2, direction: Vector2, damage: float) -> void:
+## Splats land on the ground around `origin` (feet); the spray starts `height` px above it.
+func bleed(origin: Vector2, direction: Vector2, damage: float, height: float = 6.0) -> void:
 	var layer := _get_layer()
 	if layer == null:
 		return
@@ -19,10 +20,10 @@ func bleed(origin: Vector2, direction: Vector2, damage: float) -> void:
 	for i in count:
 		var spread := direction.rotated(randf_range(-0.6, 0.6)) * randf_range(3.0, 10.0 + damage * 0.4)
 		layer.add_splat(origin + spread, randf_range(0.8, 1.8) + damage * 0.02, BLOOD_COLORS.pick_random())
-	_spray(origin, direction, count * 3, 90.0 + damage * 2.0)
+	_spray(origin + Vector2(0, -height), direction, count * 3, 90.0 + damage * 2.0)
 
 
-func gib(origin: Vector2, direction: Vector2, mass: float) -> void:
+func gib(origin: Vector2, direction: Vector2, mass: float, height: float = 6.0) -> void:
 	var layer := _get_layer()
 	if layer == null:
 		return
@@ -31,8 +32,9 @@ func gib(origin: Vector2, direction: Vector2, mass: float) -> void:
 	for i in count:
 		var dir := direction.rotated(randf_range(-1.2, 1.2)) if direction != Vector2.ZERO else Vector2.from_angle(randf() * TAU)
 		layer.add_splat(origin + dir * randf_range(2.0, 18.0 + mass * 4.0), randf_range(0.8, 2.6), BLOOD_COLORS.pick_random())
-	_spray(origin, direction, count * 2, 160.0)
-	_spray(origin, Vector2.ZERO, int(6 + mass * 2), 70.0, Color(0.6, 0.15, 0.12), 2.5)
+	var spray_origin := origin + Vector2(0, -height)
+	_spray(spray_origin, direction, count * 2, 160.0)
+	_spray(spray_origin, Vector2.ZERO, int(6 + mass * 2), 70.0, Color(0.6, 0.15, 0.12), 2.5)
 
 
 func _spray(origin: Vector2, direction: Vector2, amount: int, speed: float,
@@ -53,7 +55,8 @@ func _spray(origin: Vector2, direction: Vector2, amount: int, speed: float,
 	particles.scale_amount_max = size
 	particles.color = color
 	particles.position = origin
-	particles.z_index = 10
+	particles.z_as_relative = false
+	particles.z_index = ZLayers.FX
 	particles.finished.connect(particles.queue_free)
 	_layer.get_parent().add_child(particles)
 	particles.emitting = true
@@ -65,7 +68,7 @@ func _get_layer() -> BloodLayer:
 		return null
 	if not is_instance_valid(_layer) or _layer.get_parent() != scene:
 		_layer = BloodLayer.new()
+		_layer.z_as_relative = false
+		_layer.z_index = ZLayers.BLOOD
 		scene.add_child(_layer)
-		# First child: draws above the floor (parent) but below every character.
-		scene.move_child(_layer, 0)
 	return _layer

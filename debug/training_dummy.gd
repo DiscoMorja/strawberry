@@ -18,7 +18,7 @@ func _physics_process(delta: float) -> void:
 	_since_hit += delta
 	if _since_hit >= HEAL_DELAY:
 		health = max_health
-	queue_redraw()
+	redraw()
 
 
 func die(_hit: HitInfo) -> void:
@@ -27,4 +27,4 @@ func die(_hit: HitInfo) -> void:
 
 func _draw() -> void:
 	draw_body()
-	draw_line(Vector2(-body_radius, 0), Vector2(body_radius, 0), Color(0.3, 0.2, 0.12), 2.0)
+	draw_line(Vector2(-body_radius, -body_height * 0.6), Vector2(body_radius, -body_height * 0.6), Color(0.3, 0.2, 0.12), 2.0)

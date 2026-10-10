@@ -6,45 +6,47 @@
 [sub_resource type="Resource" id="Resource_light1"]
 script = ExtResource("2_attack")
 name = "Slash L"
+sweep_direction = 1
 windup = 0.12
 active = 0.1
-recovery = 0.22
+recovery = 0.2
 reach = 26.0
 arc_degrees = 110.0
-sweep_direction = 1
 damage = 14.0
 stagger = 12.0
 cleave = 2.5
 knockback = 40.0
-hit_stop = 0.04
+hit_stop = 0.035
 shake = 0.1
-lunge_speed = 60.0
-move_speed_multiplier = 0.4
+lunge_distance = 10.0
+lunge_lateral = 8.0
+move_speed_multiplier = 0.65
 
 [sub_resource type="Resource" id="Resource_light2"]
 script = ExtResource("2_attack")
 name = "Slash R"
+sweep_direction = -1
 windup = 0.12
 active = 0.1
-recovery = 0.22
+recovery = 0.2
 reach = 26.0
 arc_degrees = 110.0
-sweep_direction = -1
 damage = 14.0
 stagger = 12.0
 cleave = 2.5
 knockback = 40.0
-hit_stop = 0.04
+hit_stop = 0.035
 shake = 0.1
-lunge_speed = 60.0
-move_speed_multiplier = 0.4
+lunge_distance = 10.0
+lunge_lateral = 8.0
+move_speed_multiplier = 0.65
 
 [sub_resource type="Resource" id="Resource_light3"]
 script = ExtResource("2_attack")
 name = "Stab"
 windup = 0.14
 active = 0.08
-recovery = 0.28
+recovery = 0.26
 reach = 32.0
 arc_degrees = 40.0
 sweep_direction = 0
@@ -54,15 +56,15 @@ cleave = 1.5
 knockback = 60.0
 hit_stop = 0.05
 shake = 0.12
-lunge_speed = 110.0
-move_speed_multiplier = 0.4
+lunge_distance = 18.0
+move_speed_multiplier = 0.5
 
 [sub_resource type="Resource" id="Resource_heavy"]
 script = ExtResource("2_attack")
 name = "Heavy Sweep"
 windup = 0.18
 active = 0.16
-recovery = 0.4
+recovery = 0.38
 reach = 32.0
 arc_degrees = 160.0
 sweep_direction = 1
@@ -72,8 +74,9 @@ cleave = 6.0
 knockback = 120.0
 hit_stop = 0.08
 shake = 0.3
-lunge_speed = 80.0
-move_speed_multiplier = 0.3
+lunge_distance = 16.0
+lunge_lateral = 10.0
+move_speed_multiplier = 0.4
 
 [sub_resource type="Resource" id="Resource_push"]
 script = ExtResource("2_attack")
@@ -90,6 +93,8 @@ cleave = 8.0
 knockback = 170.0
 hit_stop = 0.02
 shake = 0.08
+lunge_distance = 4.0
+lunge_lead_time = 0.0
 move_speed_multiplier = 0.5
 
 [resource]

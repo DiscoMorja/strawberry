@@ -23,7 +23,10 @@ const FLASH_DURATION := 0.08
 @export var mass: float = 1.0
 ## Incoming stagger / resist = tier reached (floored, capped at KNOCKDOWN).
 @export var stagger_resist: float = 10.0
+## Footprint radius on the ground plane (collision, reach checks).
 @export var body_radius: float = 6.0
+## Visual height of the upright figure above its feet (the node origin).
+@export var body_height: float = 14.0
 @export var body_color: Color = Color.WHITE
 ## Attack-token budget: limits how many enemies may attack this target at once.
 @export var max_attackers: int = 3
@@ -37,10 +40,31 @@ var is_dead: bool = false
 
 var _flash_time: float = 0.0
 var _tokens_used: int = 0
+var _facing_sign: float = 1.0
+var _ground: GroundDecal
 
 
 func _ready() -> void:
 	health = max_health
+	_ground = GroundDecal.new()
+	_ground.draw_callback = _draw_ground
+	add_child(_ground)
+
+
+## Redraws both the upright figure and its ground layer.
+func redraw() -> void:
+	queue_redraw()
+	_ground.queue_redraw()
+
+
+## Override to draw flat, ground-level visuals (telegraphs, swing arcs) into `canvas`.
+func _draw_ground(_canvas: CanvasItem) -> void:
+	pass
+
+
+## Point above the figure's head, for popups and bars.
+func head_position() -> Vector2:
+	return global_position + Vector2(0, -body_height - body_radius * 0.7 - 4)
 
 
 func is_staggered() -> bool:
@@ -70,8 +94,8 @@ func receive_hit(hit: HitInfo) -> void:
 	_flash_time = FLASH_DURATION
 	damaged.emit(self, hit, amount)
 	var color := Color(1.0, 0.35, 0.3) if team == Team.PARTY else (Color(1.0, 0.85, 0.2) if hit.is_crit else Color.WHITE)
-	Juice.popup_text(global_position + Vector2(0, -body_radius - 6), str(roundi(amount)), color)
-	Gore.bleed(global_position, hit.direction, amount)
+	Juice.popup_text(head_position(), str(roundi(amount)), color)
+	Gore.bleed(global_position, hit.direction, amount, body_height * 0.6)
 	if health <= 0.0:
 		die(hit)
 
@@ -79,7 +103,7 @@ func receive_hit(hit: HitInfo) -> void:
 func die(hit: HitInfo) -> void:
 	is_dead = true
 	died.emit(self)
-	Gore.gib(global_position, hit.direction if hit else Vector2.ZERO, mass)
+	Gore.gib(global_position, hit.direction if hit else Vector2.ZERO, mass, body_height * 0.5)
 	queue_free()
 
 
@@ -123,11 +147,29 @@ func update_combat_state(delta: float) -> void:
 	knockback_velocity *= exp(-KNOCKBACK_DECAY * delta)
 
 
+## Upright placeholder figure standing on its origin (feet), facing left or right.
 func draw_body() -> void:
-	draw_circle(Vector2(0, 2), body_radius, Color(0, 0, 0, 0.35))
-	draw_circle(Vector2.ZERO, body_radius, Color.WHITE if _flash_time > 0.0 else body_color)
+	if aim_direction.x < -0.1:
+		_facing_sign = -1.0
+	elif aim_direction.x > 0.1:
+		_facing_sign = 1.0
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.45))
+	draw_circle(Vector2.ZERO, body_radius * 1.1, Color(0, 0, 0, 0.35))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var color := Color.WHITE if _flash_time > 0.0 else body_color
+	var width := body_radius * 1.5
+	var head_radius := width * 0.45
+	draw_rect(Rect2(-width * 0.5, -body_height, width, body_height - 1.0), color)
+	draw_circle(Vector2(0, -body_height), head_radius, color.lightened(0.15) if _flash_time <= 0.0 else color)
+	draw_circle(Vector2(_facing_sign * head_radius * 0.45, -body_height - 0.5), 0.9, Color.BLACK)
 	if is_staggered():
 		var spin := Time.get_ticks_msec() / 120.0
 		for i in stagger_tier:
 			var offset := Vector2.from_angle(spin + TAU * i / stagger_tier) * Vector2(5, 2)
-			draw_circle(Vector2(0, -body_radius - 4) + offset, 1.2, Color(1.0, 0.9, 0.3))
+			draw_circle(Vector2(0, -body_height - head_radius - 4) + offset, 1.2, Color(1.0, 0.9, 0.3))
+
+
+## Weapon held at hand height, pointing toward the aim direction.
+func draw_weapon(length: float, color: Color = Color(0.8, 0.8, 0.85)) -> void:
+	var hand := Vector2(_facing_sign * body_radius * 0.6, -body_height * 0.45)
+	draw_line(hand, hand + aim_direction * length, color, 1.5)

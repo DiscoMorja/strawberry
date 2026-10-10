@@ -51,7 +51,8 @@ func popup_text(world_position: Vector2, text: String, color: Color = Color.WHIT
 	label.add_theme_color_override("font_color", color)
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 3)
-	label.z_index = 100
+	label.z_as_relative = false
+	label.z_index = ZLayers.POPUP
 	label.size = Vector2(80, font_size * 2)
 	label.position = world_position - label.size * 0.5 + Vector2(randf_range(-3, 3), 0)
 	scene.add_child(label)

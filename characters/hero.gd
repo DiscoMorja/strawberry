@@ -14,6 +14,8 @@ const PUSH_STATE_TIME := 0.25
 @export var max_speed: float = 90.0
 @export var acceleration: float = 900.0
 @export var friction: float = 1100.0
+## Acceleration multiplier while attacking: low values let momentum carry through swings.
+@export var attack_steer_factor: float = 0.45
 
 @export_group("Stamina")
 @export var max_stamina: int = 4
@@ -44,6 +46,10 @@ var _state_time := 0.0
 var _attack: AttackData
 var _swing: MeleeSwing
 var _swing_facing := Vector2.RIGHT
+var _attack_elapsed := 0.0
+var _hit_stop_done := false
+## Input-driven velocity, kept separate from attack motion and knockback so momentum persists.
+var _move_velocity := Vector2.ZERO
 var _chain_index := 0
 var _combo_timer := 0.0
 var _charge_time := 0.0
@@ -70,7 +76,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	update_combat_state(delta)
-	queue_redraw()
+	redraw()
 	if state == State.DEAD:
 		velocity = knockback_velocity
 		move_and_slide()
@@ -127,14 +133,20 @@ func _physics_process(delta: float) -> void:
 
 	if state == State.DODGING:
 		var t := _state_time / dodge_duration
-		velocity = _dodge_direction * dodge_speed * (1.0 - t * t * 0.7)
+		_move_velocity = _dodge_direction * dodge_speed * (1.0 - t * t * 0.7)
+		velocity = _move_velocity
 	else:
 		var target_velocity := move_input * max_speed * speed_multiplier
 		var rate := acceleration if move_input != Vector2.ZERO else friction
-		velocity = velocity.move_toward(target_velocity, rate * delta)
+		if state == State.ATTACKING:
+			rate *= attack_steer_factor
+		_move_velocity = _move_velocity.move_toward(target_velocity, rate * delta)
+		velocity = _move_velocity
+		if state == State.ATTACKING:
+			var facing := aim_direction if _phase == Phase.WINDUP else _swing_facing
+			velocity += _attack.motion_velocity(_attack_elapsed, facing)
 	velocity += knockback_velocity
 	move_and_slide()
-	velocity -= knockback_velocity
 
 
 func is_winding_up() -> bool:
@@ -150,8 +162,8 @@ func die(hit: HitInfo) -> void:
 	state = State.DEAD
 	_swing = null
 	died.emit(self)
-	Gore.gib(global_position, hit.direction if hit else Vector2.ZERO, mass)
-	Juice.popup_text(global_position + Vector2(0, -20), "YOU DIED", Color(0.8, 0.1, 0.1), 16)
+	Gore.gib(global_position, hit.direction if hit else Vector2.ZERO, mass, body_height * 0.5)
+	Juice.popup_text(head_position(), "YOU DIED", Color(0.8, 0.1, 0.1), 16)
 	get_tree().create_timer(respawn_delay).timeout.connect(_respawn)
 
 
@@ -198,11 +210,14 @@ func _start_attack(attack: AttackData) -> void:
 	_phase = Phase.WINDUP
 	_phase_time = 0.0
 	_attack_buffered = false
+	_attack_elapsed = 0.0
+	_hit_stop_done = false
 	_swing = null
 
 
 func _tick_attack(delta: float) -> void:
 	_phase_time += delta
+	_attack_elapsed += delta
 	match _phase:
 		Phase.WINDUP:
 			_update_aim()
@@ -213,14 +228,16 @@ func _tick_attack(delta: float) -> void:
 				_phase_time = 0.0
 				_swing_facing = aim_direction
 				_swing = MeleeSwing.new(self, _attack, _swing_facing, PhysicsLayers.ENEMY_BODY)
-				velocity += _swing_facing * _attack.lunge_speed
 		Phase.ACTIVE:
 			if Input.is_action_just_pressed("attack"):
 				_attack_buffered = true
 			var progress := clampf(_phase_time / maxf(_attack.active, 0.001), 0.0, 1.0)
 			var hits := _swing.advance(progress)
 			if hits > 0:
-				Juice.hit_stop(_attack.hit_stop * (1.0 + 0.3 * mini(hits - 1, 3)))
+				# One hit-stop per swing: stopping again for every target the sweep reaches feels choppy.
+				if not _hit_stop_done:
+					_hit_stop_done = true
+					Juice.hit_stop(_attack.hit_stop)
 				Juice.shake(_attack.shake)
 			if _phase_time >= _attack.active:
 				_phase = Phase.RECOVERY
@@ -284,10 +301,10 @@ func _try_block(hit: HitInfo) -> bool:
 		stagger_tier = StaggerTier.STAGGER
 		stagger_time = guard_break_duration
 		_enter_staggered()
-		Juice.popup_text(global_position + Vector2(0, -16), "GUARD BREAK", Color(1.0, 0.5, 0.2), 10)
+		Juice.popup_text(head_position(), "GUARD BREAK", Color(1.0, 0.5, 0.2), 10)
 	else:
 		_spend_stamina(cost)
-		Juice.popup_text(global_position + Vector2(0, -14), "block", Color(0.6, 0.8, 1.0))
+		Juice.popup_text(head_position(), "block", Color(0.6, 0.8, 1.0))
 	return true
 
 
@@ -327,28 +344,39 @@ func _update_aim() -> void:
 
 func _draw() -> void:
 	if state == State.DEAD:
-		draw_circle(Vector2.ZERO, body_radius, Color(0.3, 0.05, 0.05))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(1.0, 0.5))
+		draw_circle(Vector2.ZERO, body_radius * 1.4, Color(0.3, 0.05, 0.05))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		return
 	if state == State.DODGING:
-		draw_circle(-_dodge_direction * 6.0, body_radius, Color(body_color, 0.3))
+		draw_rect(Rect2(-_dodge_direction * 7.0 + Vector2(-body_radius * 0.75, -body_height), Vector2(body_radius * 1.5, body_height)),
+				Color(body_color, 0.3))
 	draw_body()
-	var base := aim_direction * body_radius
-	var side := aim_direction.orthogonal() * 3.0
-	draw_colored_polygon(PackedVector2Array([aim_direction * (body_radius + 6.0), base + side, base - side]), Color.WHITE)
+	draw_weapon(9.0)
+
+
+func _draw_ground(canvas: CanvasItem) -> void:
+	if state == State.DEAD:
+		return
+	# Aim marker on the ground: the figure only faces left/right, this shows the true aim.
+	var ring := body_radius + 3.0
+	var base := aim_direction * ring
+	var side := aim_direction.orthogonal() * 2.5
+	canvas.draw_colored_polygon(PackedVector2Array([aim_direction * (ring + 5.0), base + side, base - side]), Color(1, 1, 1, 0.8))
 
 	match state:
 		State.CHARGING:
 			var heavy_ready := _charge_time >= weapon.heavy_charge_time
 			var t := clampf(_charge_time / weapon.heavy_charge_time, 0.0, 1.0)
-			draw_arc(Vector2.ZERO, body_radius + 3.0, -PI / 2, -PI / 2 + TAU * t, 16,
+			canvas.draw_arc(Vector2.ZERO, ring, -PI / 2, -PI / 2 + TAU * t, 16,
 					Color(1.0, 0.8, 0.3) if heavy_ready else Color(1, 1, 1, 0.5), 1.5)
 		State.ATTACKING:
 			if _phase == Phase.ACTIVE:
 				var progress := clampf(_phase_time / maxf(_attack.active, 0.001), 0.0, 1.0)
-				CombatDraw.swing(self, _swing_facing, _attack, progress, Color(1, 1, 1, 0.55))
+				CombatDraw.swing(canvas, _swing_facing, _attack, progress, Color(1, 1, 1, 0.55))
 		State.BLOCKING, State.PUSHING:
 			var color := Color(0.5, 0.75, 1.0, 0.9) if state == State.BLOCKING else Color(1, 1, 1, 0.9)
 			var half := deg_to_rad(weapon.block_arc_degrees) * 0.5
-			draw_arc(Vector2.ZERO, body_radius + 4.0, aim_direction.angle() - half, aim_direction.angle() + half, 12, color, 2.0)
+			canvas.draw_arc(Vector2.ZERO, ring + 1.0, aim_direction.angle() - half, aim_direction.angle() + half, 12, color, 2.0)
 			if state == State.PUSHING:
-				CombatDraw.sector(self, _swing_facing, weapon.push.reach, weapon.push.arc_degrees, Color(1, 1, 1, 0.25))
+				CombatDraw.sector(canvas, _swing_facing, weapon.push.reach, weapon.push.arc_degrees, Color(1, 1, 1, 0.25))
