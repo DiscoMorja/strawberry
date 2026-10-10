@@ -152,4 +152,4 @@ res://
 
 1. ~~`git init` + first commit.~~ Done.
 2. ~~M0: input map, physics layers, debug overlay, grey-box arena.~~ Done.
-3. M1: hero character with light/heavy/block/dodge and a training dummy, then trash + elite.
+3. M1 (in progress): core combat built — light chain, heavy, block/push/stamina, dodge, cleave, stagger, crits, trash + elite, hit-stop, shake, gore. Next: playtest + tune.

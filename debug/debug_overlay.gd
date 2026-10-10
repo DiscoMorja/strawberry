@@ -68,14 +68,14 @@ func _process(_delta: float) -> void:
 			get_tree().get_node_count_in_group("enemies"),
 		],
 		"base %s   window %s   stretch %s" % [window.content_scale_size, window.size, stretch],
-		"time scale x%.2f" % Engine.time_scale,
-		"` hud  F2 res  F3 stretch  [ ] \\ time  F4 dummy",
+		"time scale x%.2f" % Juice.base_time_scale,
+		"` hud  F2 res  F3 stretch  [ ] \\ time  F4 dummy  Z trash  X elite  C clear",
 	])
 
 
 func _set_time_scale_index(index: int) -> void:
 	_time_scale_index = clampi(index, 0, TIME_SCALES.size() - 1)
-	Engine.time_scale = TIME_SCALES[_time_scale_index]
+	Juice.base_time_scale = TIME_SCALES[_time_scale_index]
 
 
 ## Keeps the HUD roughly the same on-screen size across base resolutions.

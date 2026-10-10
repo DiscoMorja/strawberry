@@ -2,6 +2,9 @@ extends Node2D
 ## Grey-box test arena. Walls and pillars are built in code so layout tweaks are one-liners.
 
 const TrainingDummyScene := preload("res://debug/training_dummy.tscn")
+const TrashScene := preload("res://enemies/trash.tscn")
+const EliteScene := preload("res://enemies/elite.tscn")
+const TRASH_PACK_SIZE := 6
 
 @export var arena_size := Vector2(960, 640)
 @export var tile_size := 32.0
@@ -36,10 +39,23 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	var mouse := get_global_mouse_position()
 	if event.is_action_pressed("debug_spawn_dummy"):
-		var dummy := TrainingDummyScene.instantiate() as Node2D
-		dummy.position = get_global_mouse_position()
-		add_child(dummy)
+		_spawn(TrainingDummyScene, mouse)
+	elif event.is_action_pressed("debug_spawn_trash"):
+		for i in TRASH_PACK_SIZE:
+			_spawn(TrashScene, mouse + Vector2.from_angle(TAU * i / TRASH_PACK_SIZE) * 14.0)
+	elif event.is_action_pressed("debug_spawn_elite"):
+		_spawn(EliteScene, mouse)
+	elif event.is_action_pressed("debug_clear_enemies"):
+		for enemy in get_tree().get_nodes_in_group("enemies"):
+			enemy.queue_free()
+
+
+func _spawn(scene: PackedScene, at: Vector2) -> void:
+	var node := scene.instantiate() as Node2D
+	node.position = at
+	add_child(node)
 
 
 func _add_solid(rect: Rect2) -> void:

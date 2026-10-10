@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://characters/hero.gd" id="1_hero"]
+[ext_resource type="Resource" path="res://combat/data/weapons/sword_and_shield.tres" id="2_weapon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 6.0
@@ -10,6 +11,14 @@ collision_layer = 2
 collision_mask = 5
 motion_mode = 1
 script = ExtResource("1_hero")
+weapon = ExtResource("2_weapon")
+team = 0
+max_health = 100.0
+mass = 2.0
+stagger_resist = 20.0
+body_radius = 6.0
+body_color = Color(0.85, 0.75, 0.55, 1)
+max_attackers = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_body")

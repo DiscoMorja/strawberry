@@ -1,0 +1,104 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://combat/weapon_data.gd" id="1_weapon"]
+[ext_resource type="Script" path="res://combat/attack_data.gd" id="2_attack"]
+
+[sub_resource type="Resource" id="Resource_light1"]
+script = ExtResource("2_attack")
+name = "Slash L"
+windup = 0.12
+active = 0.1
+recovery = 0.22
+reach = 26.0
+arc_degrees = 110.0
+sweep_direction = 1
+damage = 14.0
+stagger = 12.0
+cleave = 2.5
+knockback = 40.0
+hit_stop = 0.04
+shake = 0.1
+lunge_speed = 60.0
+move_speed_multiplier = 0.4
+
+[sub_resource type="Resource" id="Resource_light2"]
+script = ExtResource("2_attack")
+name = "Slash R"
+windup = 0.12
+active = 0.1
+recovery = 0.22
+reach = 26.0
+arc_degrees = 110.0
+sweep_direction = -1
+damage = 14.0
+stagger = 12.0
+cleave = 2.5
+knockback = 40.0
+hit_stop = 0.04
+shake = 0.1
+lunge_speed = 60.0
+move_speed_multiplier = 0.4
+
+[sub_resource type="Resource" id="Resource_light3"]
+script = ExtResource("2_attack")
+name = "Stab"
+windup = 0.14
+active = 0.08
+recovery = 0.28
+reach = 32.0
+arc_degrees = 40.0
+sweep_direction = 0
+damage = 24.0
+stagger = 15.0
+cleave = 1.5
+knockback = 60.0
+hit_stop = 0.05
+shake = 0.12
+lunge_speed = 110.0
+move_speed_multiplier = 0.4
+
+[sub_resource type="Resource" id="Resource_heavy"]
+script = ExtResource("2_attack")
+name = "Heavy Sweep"
+windup = 0.18
+active = 0.16
+recovery = 0.4
+reach = 32.0
+arc_degrees = 160.0
+sweep_direction = 1
+damage = 34.0
+stagger = 45.0
+cleave = 6.0
+knockback = 120.0
+hit_stop = 0.08
+shake = 0.3
+lunge_speed = 80.0
+move_speed_multiplier = 0.3
+
+[sub_resource type="Resource" id="Resource_push"]
+script = ExtResource("2_attack")
+name = "Push"
+windup = 0.0
+active = 0.08
+recovery = 0.2
+reach = 24.0
+arc_degrees = 130.0
+sweep_direction = 0
+damage = 0.0
+stagger = 25.0
+cleave = 8.0
+knockback = 170.0
+hit_stop = 0.02
+shake = 0.08
+move_speed_multiplier = 0.5
+
+[resource]
+script = ExtResource("1_weapon")
+name = "Sword & Shield"
+light_chain = Array[ExtResource("2_attack")]([SubResource("Resource_light1"), SubResource("Resource_light2"), SubResource("Resource_light3")])
+heavy = SubResource("Resource_heavy")
+push = SubResource("Resource_push")
+heavy_charge_time = 0.35
+max_charge_hold = 1.2
+combo_reset_time = 0.6
+block_arc_degrees = 140.0

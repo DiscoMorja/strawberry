@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://levels/test_arena.gd" id="1_arena"]
 [ext_resource type="PackedScene" path="res://characters/hero.tscn" id="2_hero"]
 [ext_resource type="Script" path="res://core/camera_rig.gd" id="3_camera"]
+[ext_resource type="Script" path="res://ui/hero_hud.gd" id="4_hud"]
 
 [node name="TestArena" type="Node2D"]
 script = ExtResource("1_arena")
@@ -14,3 +15,15 @@ position = Vector2(480, 320)
 position = Vector2(480, 320)
 script = ExtResource("3_camera")
 target = NodePath("../Hero")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HeroHud" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_hud")
