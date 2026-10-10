@@ -49,6 +49,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_time_scale_index(_time_scale_index + 1)
 	elif event.is_action_pressed("debug_time_reset"):
 		_set_time_scale_index(DEFAULT_TIME_SCALE_INDEX)
+	elif event.is_action_pressed("debug_zoom_in") or event.is_action_pressed("debug_zoom_out"):
+		var step := 0.25 if event.is_action_pressed("debug_zoom_in") else -0.25
+		for camera in get_tree().get_nodes_in_group("game_camera"):
+			camera.set_zoom_level(camera.zoom_level + step)
 
 
 func _process(_delta: float) -> void:
@@ -68,9 +72,14 @@ func _process(_delta: float) -> void:
 			get_tree().get_node_count_in_group("enemies"),
 		],
 		"base %s   window %s   stretch %s" % [window.content_scale_size, window.size, stretch],
-		"time scale x%.2f" % Juice.base_time_scale,
-		"` hud  F2 res  F3 stretch  [ ] \\ time  F4 dummy  Z trash  X elite  C clear",
+		"time scale x%.2f   zoom x%.2f" % [Juice.base_time_scale, _camera_zoom()],
+		"` hud  F2 res  F3 stretch  [ ] \\ time  - = zoom  F4 dummy  Z trash  X elite  C clear",
 	])
+
+
+func _camera_zoom() -> float:
+	var camera := get_tree().get_first_node_in_group("game_camera") as Camera2D
+	return camera.zoom.x if camera else 1.0
 
 
 func _set_time_scale_index(index: int) -> void:
