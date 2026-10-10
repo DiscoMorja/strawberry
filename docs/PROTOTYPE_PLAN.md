@@ -90,7 +90,7 @@ Narrative, the Wizard, multiple biomes and content volume are **low risk** — d
 
 - Castle hub scene: stash, roster, loadout selection, 3 repairable rooms (Barracks, Forge, Walls), Memorial Wall.
 - Save/load (JSON or `ResourceSaver`) — stash, roster, castle state, threat level.
-- Threat clock → siege every 3 runs. Siege map with gate/wall positions, whole roster deployed.
+- Threat clock → siege every ~4 runs. Bastion (castle HP): siege loss drains it, 0 = campaign over. Siege map with gate/wall positions, whole roster deployed.
 - Scripted prologue siege + Wizard shockwave (simple cutscene: freeze, flash, text box).
 - Threat level scales dungeon stats.
 

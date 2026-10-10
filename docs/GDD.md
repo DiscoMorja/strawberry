@@ -38,6 +38,7 @@ biome boss → continue deeper **or** extract → return to castle (on death or 
 ### 3.3 Meta loop (hours)
 Spend loot on castle repairs → unlock castle functions → manage roster and stash →
 **siege** arrives on the threat clock → defend with everything you have → dungeon difficulty rises → repeat.
+Losing sieges drains the castle's HP (**Bastion**); at 0 the castle falls and the **campaign** ends (§12).
 
 ```
  ┌──────────── CASTLE ────────────┐
@@ -253,14 +254,49 @@ Hordes are noise; specials are signal. Composition is driven by a **Director** (
 
 ## 12. Siege defense
 
-- **Trigger:** Threat clock — every N runs (e.g. 3), shown in War Room. Not random, so the player can prepare.
-- **Gameplay:** Same combat system, in the castle map. **Whole roster participates** (not just the run party)
+Sieges are **the ultimate test** — the exam that all dungeon runs prepare you for.
+
+### 12.1 Cadence
+
+- **Target:** 1–2 sieges per 3–4 hour play session.
+- With 20–40 min dungeon runs that's ~5–8 runs per session → **siege every ~4 runs**.
+- **Threat clock** in the War Room counts down runs to the next siege. Never random — the player
+  always knows a test is coming and can choose who to bring, who to rest, and what to repair.
+- Optional dial: risky choices (descending deeper, opening cursed chests) advance the clock faster
+  in exchange for better loot.
+
+### 12.2 Gameplay
+
+- Same combat system, in the castle map. **Whole roster participates** (not just the run party)
   — this is the payoff for collecting followers you don't take into the dungeon.
   - Place followers at positions (gate, walls, keep) before the wave.
   - Control swaps between them during the fight.
   - Repaired structures (walls, towers, traps) matter.
-- **Outcome:** Win → reward (relics, rare recruit). Lose → castle rooms damaged (need re-repair),
-  maybe loot stolen. **Not game over** — avoid a single-point fail state that wipes hours.
+- Multiple waves, ending in a siege boss / champion. Fights are bigger than dungeon fights.
+- **Follower permadeath applies in sieges too** — the test has real stakes for the roster.
+
+### 12.3 Castle HP — "Bastion" (decided)
+
+The castle has a persistent HP bar, **Bastion** (working name). It is the campaign's life total.
+
+- **Losing a siege** costs Bastion (e.g. lose 1 of 3 pips, or a % scaled by how badly you lost —
+  enemies that reach the keep deal Bastion damage directly).
+- **Winning a siege** grants rewards (relics, rare recruit) and may restore a little Bastion.
+- **Bastion reaches 0 → the castle falls → the campaign ends.**
+- **Recovery is possible but costly:** repairing the Walls/Gate can restore Bastion with resources
+  from runs, so one bad siege doesn't start an unrecoverable death spiral.
+
+### 12.4 When the castle falls — campaign over
+
+Two-layer roguelike: **dungeon run** (20–40 min, hero death ends it) inside a **campaign**
+(many hours, castle fall ends it).
+
+- On a fall, the Wizard returns — "the next castle" from the prologue. The new campaign
+  starts at a different castle, tying the narrative hook to the fail state.
+- **Legacy carry-over (proposal, tune later):** a small, meaningful inheritance — e.g. the Memorial Wall's
+  legends become lore/starting bonuses, 1 heirloom item, unlocked follower classes/skillbooks stay
+  discovered. Not the roster or stash; the new castle must feel like a fresh start.
+- Campaign target length: open (see §13).
 
 ## 13. Design decisions & open questions
 
@@ -273,13 +309,18 @@ Hordes are noise; specials are signal. Composition is driven by a **Director** (
 | Co-op | **No** for now. Single-player architecture. |
 | Resolution | **Undecided — test several** (640×360, 960×540, 1280×720, 1920×1080 base) for look and perf in M0/M2. |
 | Tactical slow-mo for orders | **Test in M3.** |
+| Siege frequency | **1–2 per 3–4 h session** → threat clock ≈ every 4 runs (§12.1). |
+| Siege failure | **Costs castle HP (Bastion).** Bastion 0 → castle falls → campaign ends (§12.3–12.4). |
 
 ### Still open
 
-1. **Siege frequency & failure severity.**
-2. **Art style** — follows from the resolution test (pixel art vs. hi-res 2D).
-3. **Lingering wounds** — include or not (§6.2).
-4. **Mid-biome extraction points** — or boss-only?
+1. **Art style** — follows from the resolution test (pixel art vs. hi-res 2D).
+2. **Lingering wounds** — include or not (§6.2).
+3. **Mid-biome extraction points** — or boss-only?
+4. **Campaign length & win condition** — is there an ending (e.g. survive N sieges / reach the Abyss boss),
+   or endless until the castle falls?
+5. **Legacy carry-over** between campaigns — how much (§12.4).
+6. **Bastion size** — pips (e.g. 3) or a continuous bar with partial damage.
 
 ## 14. Scope guardrails
 
