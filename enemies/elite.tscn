@@ -69,7 +69,7 @@ radius = 10.0
 
 [node name="Elite" type="CharacterBody2D"]
 collision_layer = 4
-collision_mask = 7
+collision_mask = 3
 motion_mode = 1
 script = ExtResource("1_enemy")
 move_speed = 40.0

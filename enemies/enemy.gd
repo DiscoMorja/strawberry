@@ -6,6 +6,10 @@ extends Combatant
 enum State { IDLE, CHASE, WINDUP, ACTIVE, RECOVERY, STAGGERED }
 
 const RETARGET_INTERVAL := 0.5
+## Within this distance (px) enemies steer straight at the target instead of following the flow field.
+const DIRECT_CHASE_DISTANCE := 40.0
+## Enemies that can't get an attack token slow to a shuffle inside this distance (px).
+const WAITING_RING := 36.0
 
 @export var move_speed: float = 50.0
 @export var attacks: Array[AttackData] = []
@@ -29,6 +33,9 @@ var _cooldown_left := 0.0
 ## Who we hold an attack token from. Kept separate from `target`, which can change or die.
 var _token_holder: Combatant
 var _retarget_left := 0.0
+var _flow_field: FlowField
+var _crowd: Crowd
+var _was_animating := false
 
 
 func _ready() -> void:
@@ -36,6 +43,9 @@ func _ready() -> void:
 	team = Team.ENEMY
 	add_to_group("enemies")
 	_cooldown_left = randf() * attack_cooldown
+	_retarget_left = randf() * RETARGET_INTERVAL
+	_flow_field = get_tree().get_first_node_in_group("flow_field") as FlowField
+	_crowd = get_tree().get_first_node_in_group("crowd") as Crowd
 
 
 func _exit_tree() -> void:
@@ -48,7 +58,6 @@ func is_winding_up() -> bool:
 
 func _physics_process(delta: float) -> void:
 	update_combat_state(delta)
-	redraw()
 	_cooldown_left -= delta
 	_retarget_left -= delta
 	var attacking := state == State.WINDUP or state == State.ACTIVE or state == State.RECOVERY
@@ -93,8 +102,20 @@ func _physics_process(delta: float) -> void:
 				_end_attack()
 				state = State.CHASE
 
+	if _crowd:
+		desired += _crowd.separation(self)
 	velocity = desired + knockback_velocity
 	move_and_slide()
+	_redraw_if_needed()
+
+
+## Redrawing every enemy every frame is the main per-enemy render cost at horde sizes;
+## position changes don't need a redraw, only visual state changes do.
+func _redraw_if_needed() -> void:
+	var animating := state == State.WINDUP or state == State.ACTIVE or is_staggered() or _flash_time > 0.0
+	if animating or _was_animating or facing_sign_changed():
+		redraw()
+	_was_animating = animating
 
 
 func _chase() -> Vector2:
@@ -118,9 +139,16 @@ func _chase() -> Vector2:
 		min_reach = minf(min_reach, a.reach)
 	if min_reach == INF:
 		min_reach = 12.0
-	if distance > min_reach * 0.6:
-		return aim_direction * move_speed
-	return Vector2.ZERO
+	if distance <= min_reach * 0.6:
+		return Vector2.ZERO
+	# No attack slot free: hover at the edge of the fight instead of piling in.
+	if distance <= WAITING_RING and target.attackers_full():
+		return aim_direction * move_speed * 0.15
+	if distance > DIRECT_CHASE_DISTANCE and _flow_field:
+		var flow := _flow_field.direction_at(global_position)
+		if flow != Vector2.ZERO:
+			return flow * move_speed
+	return aim_direction * move_speed
 
 
 func _pick_attack(distance: float) -> AttackData:

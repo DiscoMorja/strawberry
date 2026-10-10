@@ -72,9 +72,16 @@ func _process(_delta: float) -> void:
 			get_tree().get_node_count_in_group("enemies"),
 		],
 		"base %s   window %s   stretch %s" % [window.content_scale_size, window.size, stretch],
-		"time scale x%.2f   zoom x%.2f" % [Juice.base_time_scale, _camera_zoom()],
-		"` hud  F2 res  F3 stretch  [ ] \\ time  - = zoom  F4 dummy  Z trash  X elite  C clear",
+		"time scale x%.2f   zoom x%.2f   %s" % [Juice.base_time_scale, _camera_zoom(), _director_status()],
+		"` hud  F2 res  F3 stretch  [ ] \\ time  - = zoom  F4 dummy  Z trash  X elite  C clear  V director  B +50",
 	])
+
+
+func _director_status() -> String:
+	var director := get_tree().get_first_node_in_group("director") as Director
+	if director == null or not director.enabled:
+		return "director off"
+	return "director %s %.0fs" % [director.phase_name(), director.phase_time]
 
 
 func _camera_zoom() -> float:

@@ -292,6 +292,7 @@ func _try_block(hit: HitInfo) -> bool:
 	if absf(aim_direction.angle_to(-hit.direction)) > half_arc:
 		return false
 	var cost := hit.attack.block_cost
+	Sfx.play_cue(Sfx.Cue.BLOCK, 1.0 / maxf(1.0, cost * 0.6))
 	knockback_velocity += hit.direction * hit.knockback * 0.4
 	Juice.hit_stop(0.03)
 	Juice.shake(0.1)

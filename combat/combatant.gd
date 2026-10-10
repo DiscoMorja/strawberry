@@ -92,6 +92,8 @@ func receive_hit(hit: HitInfo) -> void:
 		return
 	health -= amount
 	_flash_time = FLASH_DURATION
+	var heavy := hit.stagger >= 30.0 or hit.is_crit
+	Sfx.play_cue(Sfx.Cue.HIT_HEAVY if heavy else Sfx.Cue.HIT, 1.2 / sqrt(mass), -4.0 if team == Team.ENEMY else 0.0)
 	damaged.emit(self, hit, amount)
 	var color := Color(1.0, 0.35, 0.3) if team == Team.PARTY else (Color(1.0, 0.85, 0.2) if hit.is_crit else Color.WHITE)
 	Juice.popup_text(head_position(), str(roundi(amount)), color)
@@ -112,6 +114,10 @@ func request_attack_token(cost: int) -> bool:
 		return false
 	_tokens_used += cost
 	return true
+
+
+func attackers_full() -> bool:
+	return _tokens_used >= max_attackers
 
 
 func release_attack_token(cost: int) -> void:
@@ -145,6 +151,11 @@ func update_combat_state(delta: float) -> void:
 		stagger_tier = StaggerTier.NONE
 	_flash_time = maxf(0.0, _flash_time - delta)
 	knockback_velocity *= exp(-KNOCKBACK_DECAY * delta)
+
+
+## True when the aim crossed to the other side and the figure needs to be redrawn flipped.
+func facing_sign_changed() -> bool:
+	return (aim_direction.x < -0.1 and _facing_sign > 0.0) or (aim_direction.x > 0.1 and _facing_sign < 0.0)
 
 
 ## Upright placeholder figure standing on its origin (feet), facing left or right.
