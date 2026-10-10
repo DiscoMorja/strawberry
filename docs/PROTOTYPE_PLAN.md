@@ -151,5 +151,5 @@ res://
 ## Immediate next steps
 
 1. ~~`git init` + first commit.~~ Done.
-2. M0: input map, physics layers, debug overlay, grey-box arena.
+2. ~~M0: input map, physics layers, debug overlay, grey-box arena.~~ Done.
 3. M1: hero character with light/heavy/block/dodge and a training dummy, then trash + elite.

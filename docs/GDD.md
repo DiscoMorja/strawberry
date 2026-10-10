@@ -163,7 +163,7 @@ makes a death unrecoverable.
   (lost only if the whole run fails).
 - **Warning signs before death:** downed → bleed-out → dead, with loud UI/audio. Death should feel like
   *a mistake you saw coming*, not a random spike. Attack tokens (§7.2) prevent burst deaths.
-- **Lingering wounds (optional):** on revive, a follower may gain an injury that requires sitting out
+- **Lingering wounds:** on revive, a follower may gain an injury that requires sitting out
   the next run — an XCOM-style middle ground between "fine" and "dead".
 - **Legacy:** fallen followers go on a **Memorial Wall** in the castle. Each memorial gives a tiny
   permanent bonus or passes a trait/skill fragment to a successor ("trained by Hilde").
@@ -214,7 +214,11 @@ Hordes are noise; specials are signal. Composition is driven by a **Director** (
   Shrine (risk/reward buff), Rest (heal/revive), Boss.
 - **Biome length:** ~8–12 rooms + boss.
 - **Biome order (draft):** Crypts → Fungal Caverns → Drowned Halls → Ember Forge → Abyss. Each has a milestone boss.
-- **Extraction:** After each boss, choose **descend** (keep going, higher reward) or **extract** (bank everything).
+- **Extraction checkpoints:** Several **waystone** rooms per biome (e.g. every 3–4 rooms) plus after each boss.
+  At each one, choose **continue** (higher reward, more risk) or **extract** (bank everything, end run).
+  Reward multiplier ramps the deeper you go without extracting, so "one more room" is always tempting.
+- **Gore:** Heavy blood and dismemberment on kills; blood persists on the floor for the room. Heavy/cleave kills
+  get extra-violent finishes — gore is also feedback that a hit landed.
 
 ## 10. Loot & progression
 
@@ -312,15 +316,17 @@ Two-layer roguelike: **dungeon run** (20–40 min, hero death ends it) inside a 
 | Siege frequency | **1–2 per 3–4 h session** → threat clock ≈ every 4 runs (§12.1). |
 | Siege failure | **Costs castle HP (Bastion).** Bastion 0 → castle falls → campaign ends (§12.3–12.4). |
 
+| Campaign ending | **None for now — endless sieges** until the castle falls. |
+| Carry-over between campaigns | **Nothing for now.** Meta progression is a later option (§12.4 proposal parked). |
+| Bastion shape | **Pips** (start with 3). |
+| Art style | **Stylized, gritty pixel art with heavy gore/blood in combat.** Base resolution still to be picked by the resolution test. |
+| Lingering wounds | **Yes** (§6.2). |
+| Extraction | **Checkpoints throughout the biome** (not boss-only) where you choose to leave or continue (§9). |
+
 ### Still open
 
-1. **Art style** — follows from the resolution test (pixel art vs. hi-res 2D).
-2. **Lingering wounds** — include or not (§6.2).
-3. **Mid-biome extraction points** — or boss-only?
-4. **Campaign length & win condition** — is there an ending (e.g. survive N sieges / reach the Abyss boss),
-   or endless until the castle falls?
-5. **Legacy carry-over** between campaigns — how much (§12.4).
-6. **Bastion size** — pips (e.g. 3) or a continuous bar with partial damage.
+1. Base resolution (pixel density) — from the M0/M2 resolution test.
+2. Number of checkpoints per biome and how loot/reward ramps between them.
 
 ## 14. Scope guardrails
 
