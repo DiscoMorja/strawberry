@@ -153,4 +153,5 @@ res://
 1. ~~`git init` + first commit.~~ Done.
 2. ~~M0: input map, physics layers, debug overlay, grey-box arena.~~ Done.
 3. M1: core combat built — light chain, heavy, block/push/stamina, dodge, cleave, stagger, crits, swing momentum, moving enemy attacks, side-view presentation. Ongoing: feel tuning from playtests.
-4. M2 (in progress): flow field + crowd separation (150 enemies ≈ 5.5 ms physics), director (build-up/horde/relax), specials (archer, grabber), shielded, threat indicators, placeholder sfx. Next: playtest priority-target readability, tune director pacing.
+4. M2: flow field + crowd separation (150 enemies ~5.5 ms physics), director, specials (archer, grabber), threat indicators, placeholder sfx. Shielded enemy removed for now (too annoying).
+5. M3 (in progress): PartyMember + controllers (player/follower AI), Tab swap, orders (follow/hold/focus/regroup), tactical slow-mo (Ctrl), downed/revive (F), follower permadeath, kill counts. Followers: Brunhild (shield, defensive), Wren (bow, aggressive). Next: playtest party feel, tune AI blocking/aggression.

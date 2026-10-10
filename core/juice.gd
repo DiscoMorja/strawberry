@@ -12,6 +12,12 @@ var base_time_scale: float = 1.0:
 		base_time_scale = value
 		_apply_time_scale()
 
+## Tactical slow-motion multiplier (party command mode).
+var tactical_scale: float = 1.0:
+	set(value):
+		tactical_scale = value
+		_apply_time_scale()
+
 var _hit_stop_until_msec := 0
 
 
@@ -64,4 +70,4 @@ func popup_text(world_position: Vector2, text: String, color: Color = Color.WHIT
 
 
 func _apply_time_scale() -> void:
-	Engine.time_scale = base_time_scale * (HIT_STOP_SCALE if _hit_stop_until_msec > 0 else 1.0)
+	Engine.time_scale = base_time_scale * tactical_scale * (HIT_STOP_SCALE if _hit_stop_until_msec > 0 else 1.0)

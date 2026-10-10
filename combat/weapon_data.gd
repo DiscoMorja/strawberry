@@ -13,3 +13,9 @@ extends Resource
 ## Idle time after which the light chain restarts from the first attack.
 @export var combo_reset_time: float = 0.6
 @export_range(30.0, 360.0) var block_arc_degrees: float = 140.0
+
+@export_group("Ranged")
+## Light and heavy attacks fire projectiles instead of melee sweeps (push stays melee).
+@export var is_ranged: bool = false
+@export var projectile_speed: float = 320.0
+@export var projectile_range: float = 220.0

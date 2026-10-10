@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://characters/party_member.gd" id="1_member"]
+[ext_resource type="Resource" path="res://combat/data/weapons/bow.tres" id="2_weapon"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 5.5
+
+[node name="ArcherFollower" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 5
+motion_mode = 1
+script = ExtResource("1_member")
+weapon = ExtResource("2_weapon")
+display_name = "Wren"
+ring_color = Color(0.5, 0.9, 0.45, 1)
+ai_stance = 0
+max_speed = 95.0
+max_stamina = 2
+bleed_out_time = 15.0
+team = 0
+max_health = 70.0
+mass = 1.5
+stagger_resist = 15.0
+body_radius = 5.5
+body_height = 13.0
+body_color = Color(0.45, 0.6, 0.4, 1)
+max_attackers = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")

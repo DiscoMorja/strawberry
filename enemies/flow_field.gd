@@ -136,7 +136,7 @@ func _recompute() -> void:
 	var pending := 0
 	for node in get_tree().get_nodes_in_group("party"):
 		var member := node as Combatant
-		if member == null or member.is_dead:
+		if member == null or not member.is_targetable():
 			continue
 		var cell := world_to_cell(member.global_position)
 		if _in_bounds(cell) and _distance[_index(cell)] != 0:

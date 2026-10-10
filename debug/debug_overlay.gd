@@ -73,7 +73,7 @@ func _process(_delta: float) -> void:
 		],
 		"base %s   window %s   stretch %s" % [window.content_scale_size, window.size, stretch],
 		"time scale x%.2f   zoom x%.2f   %s" % [Juice.base_time_scale, _camera_zoom(), _director_status()],
-		"` hud  F2 res  F3 stretch  [ ] \\ time  - = zoom  F4 dummy  Z trash  X elite  C clear  N archer  M grabber  V director  B +50",
+		"` hud  F2 res  F3 stretch  [ ] \\ time  - = zoom  F4 dummy  Z trash  X elite  C clear  N archer  M grabber  V director  B +50  P followers",
 	])
 
 

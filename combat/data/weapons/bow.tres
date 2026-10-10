@@ -1,0 +1,72 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://combat/weapon_data.gd" id="1_weapon"]
+[ext_resource type="Script" path="res://combat/attack_data.gd" id="2_attack"]
+
+[sub_resource type="Resource" id="Resource_quick"]
+script = ExtResource("2_attack")
+name = "Quick Shot"
+windup = 0.22
+active = 0.05
+recovery = 0.25
+reach = 160.0
+arc_degrees = 10.0
+sweep_direction = 0
+damage = 14.0
+stagger = 12.0
+cleave = 1.0
+knockback = 50.0
+hit_stop = 0.02
+shake = 0.03
+lunge_distance = -3.0
+move_speed_multiplier = 0.7
+
+[sub_resource type="Resource" id="Resource_aimed"]
+script = ExtResource("2_attack")
+name = "Aimed Shot"
+windup = 0.1
+active = 0.05
+recovery = 0.35
+reach = 200.0
+arc_degrees = 10.0
+sweep_direction = 0
+damage = 42.0
+stagger = 40.0
+cleave = 1.0
+knockback = 140.0
+hit_stop = 0.05
+shake = 0.1
+lunge_distance = -6.0
+move_speed_multiplier = 0.4
+
+[sub_resource type="Resource" id="Resource_shove"]
+script = ExtResource("2_attack")
+name = "Shove"
+windup = 0.0
+active = 0.08
+recovery = 0.2
+reach = 18.0
+arc_degrees = 110.0
+sweep_direction = 0
+damage = 0.0
+stagger = 20.0
+cleave = 4.0
+knockback = 120.0
+hit_stop = 0.02
+shake = 0.05
+lunge_lead_time = 0.0
+move_speed_multiplier = 0.5
+
+[resource]
+script = ExtResource("1_weapon")
+name = "Hunting Bow"
+light_chain = Array[ExtResource("2_attack")]([SubResource("Resource_quick")])
+heavy = SubResource("Resource_aimed")
+push = SubResource("Resource_shove")
+heavy_charge_time = 0.5
+max_charge_hold = 2.0
+combo_reset_time = 0.6
+block_arc_degrees = 90.0
+is_ranged = true
+projectile_speed = 340.0
+projectile_range = 220.0

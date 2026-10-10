@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://characters/hero.gd" id="1_hero"]
+[ext_resource type="Script" path="res://characters/party_member.gd" id="1_hero"]
 [ext_resource type="Resource" path="res://combat/data/weapons/sword_and_shield.tres" id="2_weapon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
@@ -12,6 +12,9 @@ collision_mask = 5
 motion_mode = 1
 script = ExtResource("1_hero")
 weapon = ExtResource("2_weapon")
+display_name = "Hero"
+is_hero = true
+ring_color = Color(1, 0.85, 0.4, 1)
 team = 0
 max_health = 100.0
 mass = 2.0

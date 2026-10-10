@@ -207,7 +207,7 @@ func _pick_target() -> void:
 	var best_dist := INF
 	for node in get_tree().get_nodes_in_group("party"):
 		var candidate := node as Combatant
-		if candidate and not candidate.is_dead:
+		if candidate and candidate.is_targetable():
 			var d := global_position.distance_squared_to(candidate.global_position)
 			if d < best_dist:
 				best_dist = d
@@ -216,7 +216,12 @@ func _pick_target() -> void:
 
 
 func _target_valid() -> bool:
-	return is_instance_valid(target) and not target.is_dead
+	return is_instance_valid(target) and target.is_targetable()
+
+
+## Seconds until the current wind-up resolves (INF when not winding up). Used by follower AI to time blocks.
+func windup_remaining() -> float:
+	return _attack.windup - _phase_time if state == State.WINDUP else INF
 
 
 func _end_attack() -> void:

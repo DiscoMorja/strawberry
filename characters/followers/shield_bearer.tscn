@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://characters/party_member.gd" id="1_member"]
+[ext_resource type="Resource" path="res://combat/data/weapons/sword_and_shield.tres" id="2_weapon"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 6.5
+
+[node name="ShieldBearer" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 5
+motion_mode = 1
+script = ExtResource("1_member")
+weapon = ExtResource("2_weapon")
+display_name = "Brunhild"
+ring_color = Color(0.45, 0.65, 1, 1)
+ai_stance = 1
+max_speed = 85.0
+max_stamina = 6
+bleed_out_time = 15.0
+team = 0
+max_health = 130.0
+mass = 3.0
+stagger_resist = 25.0
+body_radius = 6.5
+body_height = 15.0
+body_color = Color(0.55, 0.6, 0.75, 1)
+max_attackers = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")

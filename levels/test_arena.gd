@@ -7,6 +7,10 @@ const TrashScene := preload("res://enemies/trash.tscn")
 const EliteScene := preload("res://enemies/elite.tscn")
 const ArcherScene := preload("res://enemies/archer.tscn")
 const GrabberScene := preload("res://enemies/grabber.tscn")
+const FollowerScenes: Array[PackedScene] = [
+	preload("res://characters/followers/shield_bearer.tscn"),
+	preload("res://characters/followers/archer_follower.tscn"),
+]
 const TRASH_PACK_SIZE := 6
 const STRESS_PACKS := 5
 const STRESS_PACK_SIZE := 10
@@ -80,9 +84,23 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("debug_stress_spawn"):
 		for i in STRESS_PACKS:
 			_director.spawn_pack(TrashScene, STRESS_PACK_SIZE)
+	elif event.is_action_pressed("debug_respawn_party"):
+		_respawn_missing_followers()
 	elif event.is_action_pressed("debug_clear_enemies"):
 		for enemy in get_tree().get_nodes_in_group("enemies"):
 			enemy.queue_free()
+
+
+## Sandbox: bring back followers that died (permadeath is real in actual runs).
+func _respawn_missing_followers() -> void:
+	var manager := get_tree().get_first_node_in_group("party_manager") as PartyManager
+	var present := manager.members.map(func(m: PartyMember) -> String: return m.scene_file_path)
+	for scene in FollowerScenes:
+		if not present.has(scene.resource_path):
+			var member := scene.instantiate() as PartyMember
+			member.position = manager.controlled.global_position + Vector2(randf_range(-20, 20), 20)
+			add_child(member)
+			manager.register(member)
 
 
 func _spawn(scene: PackedScene, at: Vector2) -> void:

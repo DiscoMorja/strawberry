@@ -78,6 +78,16 @@ func is_winding_up() -> bool:
 	return false
 
 
+## Whether enemies should consider this a target (alive and not downed).
+func is_targetable() -> bool:
+	return not is_dead
+
+
+## Called on the attacker when its hit kills `victim`.
+func on_killed(_victim: Combatant) -> void:
+	pass
+
+
 func is_grabbed() -> bool:
 	return is_instance_valid(grabbed_by) and not grabbed_by.is_dead
 
@@ -106,6 +116,8 @@ func receive_hit(hit: HitInfo) -> bool:
 	Juice.popup_text(head_position(), str(roundi(amount)), color)
 	Gore.bleed(global_position, hit.direction, amount, body_height * 0.6)
 	if health <= 0.0:
+		if team == Team.ENEMY and is_instance_valid(hit.attacker):
+			hit.attacker.on_killed(self)
 		die(hit)
 	return true
 

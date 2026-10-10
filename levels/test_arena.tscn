@@ -1,10 +1,13 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://levels/test_arena.gd" id="1_arena"]
 [ext_resource type="PackedScene" path="res://characters/hero.tscn" id="2_hero"]
 [ext_resource type="Script" path="res://core/camera_rig.gd" id="3_camera"]
-[ext_resource type="Script" path="res://ui/hero_hud.gd" id="4_hud"]
+[ext_resource type="Script" path="res://ui/party_hud.gd" id="4_hud"]
 [ext_resource type="Script" path="res://ui/threat_indicators.gd" id="5_threats"]
+[ext_resource type="PackedScene" path="res://characters/followers/shield_bearer.tscn" id="6_shield"]
+[ext_resource type="PackedScene" path="res://characters/followers/archer_follower.tscn" id="7_archer"]
+[ext_resource type="Script" path="res://characters/party_manager.gd" id="8_party"]
 
 [node name="TestArena" type="Node2D"]
 script = ExtResource("1_arena")
@@ -12,14 +15,24 @@ script = ExtResource("1_arena")
 [node name="Hero" parent="." instance=ExtResource("2_hero")]
 position = Vector2(480, 320)
 
+[node name="ShieldBearer" parent="." instance=ExtResource("6_shield")]
+position = Vector2(460, 340)
+
+[node name="ArcherFollower" parent="." instance=ExtResource("7_archer")]
+position = Vector2(500, 340)
+
 [node name="CameraRig" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 position = Vector2(480, 320)
 script = ExtResource("3_camera")
 target = NodePath("../Hero")
 
+[node name="PartyManager" type="Node2D" parent="." node_paths=PackedStringArray("camera")]
+script = ExtResource("8_party")
+camera = NodePath("../CameraRig")
+
 [node name="HUD" type="CanvasLayer" parent="."]
 
-[node name="HeroHud" type="Control" parent="HUD"]
+[node name="PartyHud" type="Control" parent="HUD"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
